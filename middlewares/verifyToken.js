@@ -5,7 +5,7 @@ const verifyToken = async (req, res, next) => {
     try {
         const token = req.cookie.token;
         if(!token) {
-            return res.json("Please login");
+            return res.status(401).send({error: "Please authenticate/login using a valid token"});
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = await prisma.user.findUnique({
@@ -16,6 +16,6 @@ const verifyToken = async (req, res, next) => {
         next();
     }
     catch (error) {
-        throw new Error(error);
+        res.status(500).json({error});
     }
 }

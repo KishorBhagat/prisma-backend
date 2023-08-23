@@ -7,7 +7,7 @@ exports.signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
-            throw new Error('please provide all fields');
+            return res.status(400).json({error: { message: "please provide name, email and password" }});
         }
         const user = await prisma.user.create({
             data: {
@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
         })
         generateCookieToken(user, res);
     } catch (error) {
-        throw new Error(error);
+        res.status(500).json({error});
     }
 }
 
@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            throw new Error('Please provide email and password');
+            return res.status(400).json({error: { message: "please provide email and password" }});
         }
         // Find a user based on email
         const user = await prisma.user.findUnique({
@@ -37,14 +37,14 @@ exports.login = async (req, res) => {
         })
         // When there is no user
         if(!user) {
-            throw new Error('User not found');
+            res.status(400).json({ error: { message: "Invalid Credentials!" } });
         }
         if(user.password !== password) {
-            throw new Error('Invlaid password');
+            res.status(400).json({ error: { message: "Invalid Credentials!" } });
         }
         generateCookieToken(user, res);
     } catch (error) {
-        throw new Error(error);
+        res.status(500).json({error});
     }
 }
 
@@ -53,6 +53,6 @@ exports.logout = async (req, res) => {
         res.clearCookie('token');
         res.json({success: true});
     } catch (error) {
-        throw new Error(error);
+        res.status(500).json({error});
     }
 }
